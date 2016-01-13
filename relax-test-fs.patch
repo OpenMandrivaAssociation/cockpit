@@ -1,0 +1,36 @@
+From 969caaa104a7567192c23bb1cd2964e3c2bf686e Mon Sep 17 00:00:00 2001
+From: Stef Walter <stefw@redhat.com>
+Date: Wed, 2 Sep 2015 12:15:40 +0200
+Subject: [PATCH] bridge: Fix test-fs to account for different glib2 behavior
+
+Different versions of glib2 send the GFileMonitor events in
+different order, some see "created" first, others "deleted" first.
+
+So relax the test a bit to account for this.
+---
+ src/bridge/test-fs.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/src/bridge/test-fs.c b/src/bridge/test-fs.c
+index 32c66c8..fe2b947 100644
+--- a/src/bridge/test-fs.c
++++ b/src/bridge/test-fs.c
+@@ -664,6 +664,15 @@ test_watch_simple (TestCase *tc,
+   tag = cockpit_get_file_tag (tc->test_path);
+ 
+   event = recv_json (tc);
++  g_assert (event != NULL);
++
++  /* Account for different behavior by different glib2 versions */
++  if (g_str_equal (json_object_get_string_member (event, "event"), "deleted"))
++    {
++      json_object_unref (event);
++      event = recv_json (tc);
++    }
++
+   g_assert_cmpstr (json_object_get_string_member (event, "event"), ==, "created");
+   g_assert_cmpstr (json_object_get_string_member (event, "path"), ==, tc->test_path);
+   g_assert_cmpstr (json_object_get_string_member (event, "tag"), ==, tag);
+-- 
+2.4.3
+

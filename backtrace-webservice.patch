@@ -1,0 +1,72 @@
+From 1d480347c730596c23a8dcb769e6e46895862c68 Mon Sep 17 00:00:00 2001
+From: Stef Walter <stefw@redhat.com>
+Date: Thu, 27 Aug 2015 09:38:55 +0200
+Subject: [PATCH 2/2] ws: Add backtrace handler to test-webservice to debug
+ issues
+
+Closes #2633
+Reviewed-by: Peter <petervo@redhat.com>
+---
+ src/common/cockpittest.c | 24 +++++++++++++++---------
+ src/ws/test-webservice.c |  3 +++
+ 2 files changed, 18 insertions(+), 9 deletions(-)
+
+diff --git a/src/common/cockpittest.c b/src/common/cockpittest.c
+index bf20b11..2aeb0ad 100644
+--- a/src/common/cockpittest.c
++++ b/src/common/cockpittest.c
+@@ -512,13 +512,15 @@ stack_trace (char **args)
+       int old_err = dup (2);
+       fcntl (old_err, F_SETFD, fcntl (old_err, F_GETFD) | FD_CLOEXEC);
+ 
+-      close (0); dup (in_fd[0]);   /* set the stdin to the in pipe */
+-      close (1); dup (out_fd[1]);  /* set the stdout to the out pipe */
+-
+-      execvp (args[0], args);      /* exec gdb */
+-
+-      /* Print failure to original stderr */
+-      perror ("exec gdb failed");
++      if (dup2 (in_fd[0], 0) < 0 || dup2 (out_fd[1], 1) < 0)
++        {
++          perror ("dup fds failed");
++        }
++      else
++        {
++          execvp (args[0], args);
++          perror ("exec gdb failed");
++        }
+       _exit (0);
+     }
+   else if (pid == (pid_t) -1)
+@@ -530,8 +532,12 @@ stack_trace (char **args)
+   FD_ZERO (&fdset);
+   FD_SET (out_fd[0], &fdset);
+ 
+-  write (in_fd[1], "backtrace\n", 10);
+-  write (in_fd[1], "quit\n", 5);
++  if (write (in_fd[1], "backtrace\n", 10) != 10 ||
++      write (in_fd[1], "quit\n", 5) != 5)
++    {
++      perror ("unable to send commands to gdb");
++      _exit (0);
++    }
+ 
+   idx = 0;
+   state = 0;
+diff --git a/src/ws/test-webservice.c b/src/ws/test-webservice.c
+index 0cb96b2..3a2dca8 100644
+--- a/src/ws/test-webservice.c
++++ b/src/ws/test-webservice.c
+@@ -2028,6 +2028,9 @@ main (int argc,
+    */
+   g_timeout_add_seconds (1, on_hack_raise_sigchld, NULL);
+ 
++  /* Try to debug crashing during tests */
++  signal (SIGSEGV, cockpit_test_signal_backtrace);
++
+   /* We don't want to test the ping functionality in these tests */
+   cockpit_ws_ping_interval = G_MAXUINT;
+ 
+-- 
+2.4.3
+

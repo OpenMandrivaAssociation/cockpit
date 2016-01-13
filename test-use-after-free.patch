@@ -1,0 +1,36 @@
+From fe2156eda6b42436dbfe82d1402ecfabc1c2ffd4 Mon Sep 17 00:00:00 2001
+From: Stef Walter <stefw@redhat.com>
+Date: Wed, 2 Sep 2015 13:26:16 +0200
+Subject: [PATCH] common: Hold reference during processing of messages
+
+This prevents use-after-free in tests, where a message triggers
+the test completion.
+---
+ src/common/cockpitpipetransport.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/common/cockpitpipetransport.c b/src/common/cockpitpipetransport.c
+index af9a8e6..743ec3f 100644
+--- a/src/common/cockpitpipetransport.c
++++ b/src/common/cockpitpipetransport.c
+@@ -81,6 +81,8 @@ on_pipe_read_transport (CockpitPipe *pipe,
+   guint32 i, size;
+   gchar *data;
+ 
++  g_object_ref (self);
++
+   for (;;)
+     {
+       size = 0;
+@@ -135,6 +137,8 @@ on_pipe_read_transport (CockpitPipe *pipe,
+           cockpit_pipe_close (pipe, "internal-error");
+         }
+     }
++
++  g_object_unref (self);
+ }
+ 
+ static void
+-- 
+2.4.3
+
