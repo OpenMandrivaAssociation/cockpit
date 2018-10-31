@@ -1,7 +1,7 @@
 Summary:        A user interface for Linux servers
 Name:		cockpit
 Version:	0.90
-Release:	1
+Release:	2
 License:	LGPLv2+
 URL:		http://cockpit-project.org/
 Group:		System/Servers
