@@ -3,7 +3,7 @@ Name:		cockpit
 Version:	0.90
 Release:	2
 License:	LGPLv2+
-URL:		http://cockpit-project.org/
+URL:		https://cockpit-project.org/
 Group:		System/Servers
 Source0:	https://github.com/cockpit-project/cockpit/releases/download/%{version}/%{name}-%{version}.tar.bz2
 BuildRequires:	pkgconfig(gio-unix-2.0)
