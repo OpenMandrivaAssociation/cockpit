@@ -6,6 +6,11 @@ License:	LGPLv2+
 URL:		https://cockpit-project.org/
 Group:		System/Servers
 Source0:	https://github.com/cockpit-project/cockpit/releases/download/%{version}/%{name}-%{version}.tar.bz2
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool-base
+BuildRequires:	slibtool
+BuildRequires:	make
 BuildRequires:	pkgconfig(gio-unix-2.0)
 BuildRequires:	pkgconfig(json-glib-1.0)
 BuildRequires:	pkgconfig(polkit-agent-1) >= 0.105
