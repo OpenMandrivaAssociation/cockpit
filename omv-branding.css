@@ -1,0 +1,35 @@
+/* SPDX-License-Identifier: LGPL-2.1-or-later */
+/* OpenMandriva branding for Cockpit */
+#badge {
+    inline-size: 225px;
+    block-size: 50px;
+    background-image: url("logo.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center left;
+}
+
+#brand::before {
+    content: "OpenMandriva";
+}
+
+.anaconda {
+    /* OpenMandriva brand palette - blue tones */
+    --brand-default-light: #5b9bd5;
+    --brand-default: #2d6eaa;
+    --brand-default-dark: #1a4a7a;
+
+    .logo {
+        background-image: url("logo.png");
+    }
+}
+
+:not(.pf-v6-theme-dark) .anaconda {
+    --pf-t--global--color--brand--default: var(--brand-default);
+    --pf-t--global--color--brand--hover: var(--brand-default-dark);
+}
+
+.pf-v6-theme-dark .anaconda {
+    --pf-t--global--color--brand--default: var(--brand-default-light);
+    --pf-t--global--color--brand--hover: var(--brand-default);
+}
